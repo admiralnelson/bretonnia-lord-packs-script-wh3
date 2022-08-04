@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "typescript-to-lua": "^1.7.2"
+  },
+  "dependencies": {
+    "tstl": "^2.5.8"
+  }
+}
