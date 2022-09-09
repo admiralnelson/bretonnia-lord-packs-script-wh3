@@ -8,7 +8,7 @@
     "tstl": "^2.5.8"
   },
   "files": [
-    "dist/**/*.lua", 
-    "dist/**/*.d.ts" 
+    "dist/**/*.lua",
+    "dist/**/*.d.ts"
   ]
 }

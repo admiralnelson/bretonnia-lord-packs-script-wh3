@@ -3,11 +3,12 @@
     "target": "esnext",
     "lib": ["esnext"],
     "moduleResolution": "node",
-    "types": [],
+    "types": ["lua-types/5.1"],
     "strict": true,
   },
   "tstl": {
-    "luaTarget": "5.1"
+    "luaTarget": "5.1",
+    "sourceMapTraceback": false
   },
   "include": [
     "**/__tests__/**/*.ts",  
