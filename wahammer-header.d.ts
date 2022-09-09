@@ -343,6 +343,11 @@ interface ICharacterDetailsScript extends INullScript {
 interface ICampaignManager {
     add_first_tick_callback(callback: Function): void
     spawn_character_to_pool(faction: string, forename: string, surname: string, clanname: string, othername: string, age: number, male: boolean, agentKey: string, agentSubtypeKey: string, immortal: boolean, artSetKey: string): ICharacterDetailsScript
+    /** max and min are inclusive. multiplayer safe */
+    random_number(max: number, min: number): number
+    random_sort(list: Array<any>): Array<any>
+    random_sort_copy(list: Array<any>): Array<any>
+    shuffle_table(list: Array<any>): void
 }
 
 /** context of the callback or conditional checks, get your faction, char, etc. from here */

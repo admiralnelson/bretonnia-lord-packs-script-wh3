@@ -8,9 +8,9 @@ namespace AdmiralNelson {
         private readonly l = new Logger("BretLordPack")
 
         private readonly LordAgentSubtypes = [
+            "admiralnelson_bret_lord_2handed_agent_key",
             "admiralnelson_bret_lord_massif_agent_key",
             "admiralnelson_bret_lord_massif_sword_shield_agent_key",
-            "admiralnelson_bret_lord_2handed_agent_key"
         ]
         
         private readonly BretonnianFactionsKeys = [
@@ -37,13 +37,24 @@ namespace AdmiralNelson {
             core.add_listener(
                 "admiralnelsonOnTurnBegin", 
                 "FactionTurnStart", 
-                true,
                 (context) => {
                     const faction = context ? context.faction().name() : ""
-                    if(this.BretonnianFactionsKeys.indexOf(faction) >= 0) {
-                        this.l.Log(`this is bretonnian faction. its leader is ${context?.faction().faction_leader().character_subtype_key()}`)
+                    return this.BretonnianFactionsKeys.indexOf(faction) >= 0
+                },
+                (context) => {
+                    const factionKey = context ? context.faction().name() : ""
+                    if(factionKey == "") {
+                        this.l.LogError(`should not happen!`)
+                        return
                     }
 
+                    this.l.Log(`current bret faction ${factionKey}`)
+
+                    const randomNr = cm.random_number(this.LordAgentSubtypes.length - 1, 0)
+                    const pickedAgentKey = this.LordAgentSubtypes[randomNr]
+                    this.l.LogWarn(`I picked ${pickedAgentKey} lord to be added into pool`)
+
+                    cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", pickedAgentKey, false, "")
                 },
                 true
             )
