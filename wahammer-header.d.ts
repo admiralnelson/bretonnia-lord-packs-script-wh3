@@ -21,7 +21,13 @@ interface IListScript {
 
 
 interface IModelScript extends INullScript {
-    
+    can_reach_character(who: ICharacterScript, againstWho: ICharacterScript): boolean
+    can_reach_settlement(who: ICharacterScript, where: ISettlementScript): boolean
+    can_reach_position(who: ICharacterScript, x: number, y: number): boolean
+    can_reach_character_in_stance(who: ICharacterScript, againstWho: ICharacterScript, stanceKey: string): boolean
+    can_reach_settlement_in_stance(who: ICharacterScript, where: ISettlementScript, stanceKey: string): boolean
+    can_reach_position_in_stance(who: ICharacterScript, x: number, y: number, stanceKey: string): boolean
+    has_effect_bundle(effectBundleKey: string): boolean
 }
 
 interface IRegionListScript extends INullScript {
@@ -48,6 +54,10 @@ interface IEffectBundleListScript extends IListScript {
 
 }
 
+interface ISettlementScript extends INullScript {
+
+}
+
 interface IBonusValuesScript extends INullScript {
 
 }
@@ -64,12 +74,104 @@ interface IFactionProvinceManagerList extends INullScript {
 
 }
 
+interface IGarrisonResidenceScript extends INullScript {
+
+}
+
 interface IRegionScript extends INullScript {
 
 }
 
-interface ICharacterScript extends INullScript{
+interface ISeaRegionScript extends INullScript {
 
+}
+
+interface IRegionDataScript extends INullScript {
+
+}
+
+interface IMilitaryForceScript extends INullScript {
+
+}
+
+interface ICharacterScript extends INullScript, ICharacterDetailsScript, IModelScript {
+    command_queue_index(): number
+    has_garrison_residence(): boolean
+    has_region(): boolean
+    has_military_force(): boolean
+    garrison_residence(): IGarrisonResidenceScript
+    faction(): IFactionScript
+    region(): IRegionScript
+    sea_region(): ISeaRegionScript
+    region_data(): IRegionDataScript
+    military_force(): IMilitaryForceScript
+    flag_path(): string
+    in_settlement(): boolean
+    in_port(): boolean
+    is_besieging(): boolean
+    is_blockading(): boolean
+    is_carrying_troops(): boolean
+    is_governor(): boolean
+
+    battles_fought(): number
+    action_points_remaining_percent(): number
+    action_points_per_turn(): number
+
+    performed_action_this_turn(): number
+    is_ambushing(): boolean
+    turns_at_sea(): number
+    turns_in_own_regions(): number
+    turns_in_enemy_regions(): number
+    is_faction_leader(): boolean
+    rank(): number
+    defensive_sieges_fought(): number
+    defensive_sieges_won(): number
+    offensive_sieges_fought(): number
+    offensive_sieges_won(): number
+    fought_in_battle(): boolean
+    won_battle(): number
+    percentage_of_own_alliance_killed(): number
+    ministerial_position(): string
+    logical_position_x(): number
+    logical_position_y(): number
+    display_position_x(): number
+    display_position_y(): number
+    battles_won(): number
+    offensive_battles_won(): number
+    offensive_battles_fought(): number
+    defensive_battles_won(): number
+    defensive_battles_fought(): number
+    offensive_naval_battles_won(): number
+    offensive_naval_battles_fought(): number
+    defensive_naval_battles_won(): number
+    defensive_naval_battles_fought(): number
+    offensive_ambush_battles_won(): number
+    offensive_ambush_battles_fought(): number
+    defensive_ambush_battles_won(): number
+    defensive_ambush_battles_fought(): number
+    cqi(): number
+    is_embedded_in_military_force(): boolean
+    embedded_in_military_force(): IMilitaryForceScript
+
+    is_hidden(): boolean
+    routed_in_battle(): boolean
+    body_guard_casulties(): number
+    is_deployed(): boolean
+    is_at_sea(): boolean
+    has_recruited_mercenaries(): boolean
+    
+    interfaction_loyalty(): number
+    
+    is_politician(): boolean
+    post_battle_ancilary_chance(): number
+    is_caster(): boolean
+    is_visible_to_faction(): boolean
+    can_equip_ancillary(): boolean
+    is_wounded(): boolean
+    character_details(): ICharacterDetailsScript
+    effect_bundles(): IEffectBundleListScript
+
+    bonus_values(): IBonusValuesScript
 }
 
 interface IPooledResourceManager extends INullScript {
@@ -85,6 +187,7 @@ interface IFactionScript extends INullScript {
     is_factions_turn(): boolean
     is_human(): boolean
     is_idle_human(): boolean
+    /** returns faction key */
     name(): string
     home_region(): IRegionScript 
     faction_leader(): ICharacterScript
@@ -242,7 +345,9 @@ interface ICampaignManager {
     spawn_character_to_pool(faction: string, forename: string, surname: string, clanname: string, othername: string, age: number, male: boolean, agentKey: string, agentSubtypeKey: string, immortal: boolean, artSetKey: string): ICharacterDetailsScript
 }
 
+/** context of the callback or conditional checks, get your faction, char, etc. from here */
 interface IContext {
+    /** gets faction interface, could be INullScript */
     faction() : IFactionScript
 }
 

@@ -5,6 +5,8 @@ namespace AdmiralNelson {
     class BretLordPack {
         constructor() {}
 
+        private readonly l = new Logger("BretLordPack")
+
         private readonly LordAgentSubtypes = [
             "admiralnelson_bret_lord_massif_agent_key",
             "admiralnelson_bret_lord_massif_sword_shield_agent_key",
@@ -28,20 +30,23 @@ namespace AdmiralNelson {
 
         Init(): void {
             this.LordAgentSubtypes.forEach(element => {
-                Log(element)
-            });
+                this.l.Log(element)
+            })
 
-            LogWarn("hello i'm compiled from typescript!")
+            this.l.LogWarn("hello i'm compiled from typescript!")
             core.add_listener(
                 "admiralnelsonOnTurnBegin", 
                 "FactionTurnStart", 
+                true,
                 (context) => {
-                    return true
+                    const faction = context ? context.faction().name() : ""
+                    if(this.BretonnianFactionsKeys.indexOf(faction) >= 0) {
+                        this.l.Log(`this is bretonnian faction. its leader is ${context?.faction().faction_leader().character_subtype_key()}`)
+                    }
+
                 },
-                (context) => {},
                 true
             )
-        
         }
     }
 
