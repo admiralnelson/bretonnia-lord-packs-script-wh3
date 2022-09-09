@@ -1,0 +1,1 @@
+/// <reference path="wahammer-header.d.ts" />
