@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "types": ["lua-types/5.1"],
     "strict": true,
+    "outDir": "script/"
   },
   "tstl": {
     "luaTarget": "5.1",

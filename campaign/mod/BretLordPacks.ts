@@ -1,6 +1,7 @@
 namespace AdmiralNelson {
 
     const DEBUG = true
+    const VERSION = 1
 
     class BretLordPack {
         constructor() {}
@@ -8,9 +9,9 @@ namespace AdmiralNelson {
         private readonly l = new Logger("BretLordPack")
 
         private readonly LordAgentSubtypes = [
-            "admiralnelson_bret_lord_2handed_agent_key",
             "admiralnelson_bret_lord_massif_agent_key",
             "admiralnelson_bret_lord_massif_sword_shield_agent_key",
+            "admiralnelson_bret_lord_2handed_agent_key",
         ]
         
         private readonly BretonnianFactionsKeys = [
@@ -27,13 +28,26 @@ namespace AdmiralNelson {
             "wh_main_brt_carcassonne"
         ]
         
+        private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
+            this.l.LogWarn(debug.traceback())
+            this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool`)
+            cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
+        }
+
+        private SpawnLordToCenter(subtypeKey: string, factionKey: string): void {
+
+        }
 
         Init(): void {
             this.LordAgentSubtypes.forEach(element => {
                 this.l.Log(element)
             })
 
+
+            JSON.parse("{}")
+
             this.l.LogWarn("hello i'm compiled from typescript!")
+            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
             core.add_listener(
                 "admiralnelsonOnTurnBegin", 
                 "FactionTurnStart", 
@@ -50,14 +64,17 @@ namespace AdmiralNelson {
 
                     this.l.Log(`current bret faction ${factionKey}`)
 
-                    const randomNr = cm.random_number(this.LordAgentSubtypes.length - 1, 0)
-                    const pickedAgentKey = this.LordAgentSubtypes[randomNr]
-                    this.l.LogWarn(`I picked ${pickedAgentKey} lord to be added into pool`)
-
-                    cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", pickedAgentKey, false, "")
+                    //const randomNr = cm.random_number(this.LordAgentSubtypes.length - 1, 0)
+                    //const pickedAgentKey = this.LordAgentSubtypes[0]
+                    this.LordAgentSubtypes.forEach(key => {
+                        this.SpawnLordToPool(key, factionKey)
+                    });
+                    
                 },
                 true
             )
+
+            
         }
     }
 

@@ -2,13 +2,26 @@
 
 
 declare function print(...args: any[]): void
-/** ONLY AVAILABLE IN SNED LOADER ENV ONLY! */
-declare function DebuggerBreakHere(): void
+/**
+ * ONLY AVAILABLE IN SNED LOADER ENV ONLY! 
+ * starts SNED lua debugger */
+declare function StartDebugger(): void
+/** 
+ * ONLY AVAILABLE IN SNED LOADER ENV ONLY!
+ * stops SNED lua debugger */
+declare function StopDebugger(): void
+
 /** ONLY AVAILABLE IN SNED LOADER ENV ONLY! */
 declare function PrintWarning(s: string): void
 /** ONLY AVAILABLE IN SNED LOADER ENV ONLY! */
 declare function PrintError(s: string): void
 declare function out(s: string): void
+
+/** JSON interface: campaign\mod\JSON.lua */
+interface JSON {
+    stringify(this: void, o: any): string;
+    parse(this: void, s: string): any;
+}
 
 interface INullScript {
     is_null_interface(): boolean
@@ -336,11 +349,11 @@ interface ICharacterDetailsScript extends INullScript {
     character_initiative_sets(): ICharacterInitiativeSetListScript
     lookup_character_initiative_set_by_key(recordKey: string): ICharacterInitiativeSetListScript
     pooled_resource_manager(): IPooledResourceManager
-    character(): ICharacterDetailsScript
-    primary_character(): ICharacterDetailsScript
+    character(): ICharacterScript
 }
 
 interface ICampaignManager {
+    /** a function will fire right after loading has finished  */
     add_first_tick_callback(callback: Function): void
     spawn_character_to_pool(faction: string, forename: string, surname: string, clanname: string, othername: string, age: number, male: boolean, agentKey: string, agentSubtypeKey: string, immortal: boolean, artSetKey: string): ICharacterDetailsScript
     /** max and min are inclusive. multiplayer safe */
@@ -348,12 +361,17 @@ interface ICampaignManager {
     random_sort(list: Array<any>): Array<any>
     random_sort_copy(list: Array<any>): Array<any>
     shuffle_table(list: Array<any>): void
+    /** forcefully add skill to a character. don't know what stringLookup is? search this in manual: Character Lookups */
+    force_add_skill(stringLookUp: string, skillKey: string): void
+    char_lookup_str(character: ICharacterScript): string
 }
 
 /** context of the callback or conditional checks, get your faction, char, etc. from here */
 interface IContext {
     /** gets faction interface, could be INullScript */
     faction() : IFactionScript
+    character(): ICharacterScript
+    character_details(): ICharacterDetailsScript
 }
 
 type ConditionalTest = {
