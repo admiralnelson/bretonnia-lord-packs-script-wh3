@@ -1,4 +1,4 @@
-namespace AdmBretLordPack {
+namespace AdmiralNelsonLordPack {
     type Data = null|Object|Number|String|Array<any> 
     export class localStorage {
         public static setItem(key: string, value: Data) : void {

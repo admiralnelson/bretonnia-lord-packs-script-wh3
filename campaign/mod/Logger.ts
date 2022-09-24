@@ -1,4 +1,4 @@
-namespace AdmiralNelson {
+namespace AdmiralNelsonLordPack {
     export class Logger {
 
         private _name: string = ""

@@ -1,17 +1,21 @@
-namespace AdmBretLordPack {
+namespace AdmiralNelsonLordPack {
 
     const DEBUG = true
     const VERSION = 1
+    const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
 
     class BretLordPack {
-        constructor() {}
+        constructor() {
+            this.FirstTimeSetup()
+            this.Init()
+        }
 
         private readonly l = new Logger("BretLordPack")
 
         private readonly LordAgentSubtypes = [
-            "admiralnelson_bret_lord_massif_agent_key",
-            "admiralnelson_bret_lord_massif_sword_shield_agent_key",
-            "admiralnelson_bret_lord_2handed_agent_key",
+            "AdmiralNelsonLordPack_bret_lord_massif_agent_key",
+            "AdmiralNelsonLordPack_bret_lord_massif_sword_shield_agent_key",
+            "AdmiralNelsonLordPack_bret_lord_2handed_agent_key",
         ]
         
         private readonly BretonnianFactionsKeys = [
@@ -29,7 +33,7 @@ namespace AdmBretLordPack {
         ]
         
         private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
-            this.l.LogWarn(debug.traceback())
+            //this.l.LogWarn(debug.traceback())
             this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool`)
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
         }
@@ -38,17 +42,22 @@ namespace AdmBretLordPack {
 
         }
 
+        FirstTimeSetup(): void {
+            if(localStorage.getItem(ADMBRETLORDPACK) != null) return
+            
+            this.l.LogWarn("First time setup")
+            this.l.LogWarn(JSON.stringify(this.BretonnianFactionsKeys))
+        }
+
         Init(): void {
             this.LordAgentSubtypes.forEach(element => {
                 this.l.Log(element)
             })
 
-            this.l.LogWarn(JSON.stringify(this.BretonnianFactionsKeys))
-
             this.l.LogWarn("hello i'm compiled from typescript!")
             this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
             core.add_listener(
-                "admiralnelsonOnTurnBegin", 
+                "AdmiralNelsonLordPackOnTurnBegin", 
                 "FactionTurnStart", 
                 (context) => {
                     const faction = context ? context.faction().name() : ""
@@ -78,6 +87,6 @@ namespace AdmBretLordPack {
     }
 
     cm.add_first_tick_callback( () => {
-        new BretLordPack().Init()
+        new BretLordPack()
     })
 }
