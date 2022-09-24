@@ -3,6 +3,7 @@ namespace AdmiralNelsonLordPack {
     const DEBUG = true
     const VERSION = 1
     const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
+    const BRETLORDPOOL = "BRETLORDPOOL"
 
     const HUMAN_THRESHOLD = 20
     const BOT_THRESHOLD = 10
@@ -12,6 +13,11 @@ namespace AdmiralNelsonLordPack {
     class BretLordPack {
 
         private readonly l = new Logger("BretLordPack")
+        // ok
+        private bretLordPool : Array<LordPool> = []
+        // NOT SUPPORTED
+        // private bretLordPool : Array<LordPool> = new Array
+        // private bretLordPool = new Array<LordPool> 
 
         private readonly LordAgentSubtypes = [
             "admiralnelson_bret_lord_massif_agent_key",
@@ -32,6 +38,13 @@ namespace AdmiralNelsonLordPack {
             "wh_main_brt_bretonnia",
             "wh_main_brt_carcassonne"
         ]
+
+        private GetLordPoolOnFaction(factionKey: string) : AgentKeyToCount | null {
+            this.bretLordPool.forEach(element => {
+                if(element.Faction == factionKey) return element
+            })
+            return null
+        }
         
         private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
@@ -51,6 +64,18 @@ namespace AdmiralNelsonLordPack {
             this.l.LogWarn("First time setup")
             localStorage.setItem("ADMBRETLORDPACK", ADMBRETLORDPACK)
             this.l.LogWarn("Save game has been tagged")
+            this.SetupTheLordPool()
+            
+        }
+
+        SetupTheLordPool(): void {
+            if(this.bretLordPool.length > 0) return;
+
+            this.BretonnianFactionsKeys.forEach(fac => {
+                this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
+            })
+            localStorage.setItem(BRETLORDPOOL, JSON.stringify(this.bretLordPool))
+            this.l.LogWarn(localStorage.getItem(BRETLORDPOOL))
         }
 
         DiceRollCheck(threshold: number, noOfDices: number = 1, side: number = 6) : boolean {
@@ -119,6 +144,9 @@ namespace AdmiralNelsonLordPack {
         }
 
         constructor() {
+            this.l.LogWarn("hello i'm compiled from typescript!")
+            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
+
             this.FirstTimeSetup()
             this.Init()
         }
