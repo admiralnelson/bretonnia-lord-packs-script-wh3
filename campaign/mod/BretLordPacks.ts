@@ -1,4 +1,4 @@
-namespace AdmiralNelson {
+namespace AdmBretLordPack {
 
     const DEBUG = true
     const VERSION = 1

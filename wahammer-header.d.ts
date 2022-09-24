@@ -364,6 +364,8 @@ interface ICampaignManager {
     /** forcefully add skill to a character. don't know what stringLookup is? search this in manual: Character Lookups */
     force_add_skill(stringLookUp: string, skillKey: string): void
     char_lookup_str(character: ICharacterScript): string
+    set_saved_value(key: string, value: any): void
+    get_saved_value(key: string): string|number|object|Array<any>
 }
 
 /** context of the callback or conditional checks, get your faction, char, etc. from here */
