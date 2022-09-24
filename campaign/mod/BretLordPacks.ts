@@ -43,8 +43,7 @@ namespace AdmiralNelson {
                 this.l.Log(element)
             })
 
-
-            JSON.parse("{}")
+            this.l.LogWarn(JSON.stringify(this.BretonnianFactionsKeys))
 
             this.l.LogWarn("hello i'm compiled from typescript!")
             this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)

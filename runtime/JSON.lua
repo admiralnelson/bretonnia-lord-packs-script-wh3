@@ -386,5 +386,6 @@ function JSON.decode(str)
   return res
 end
 
+_G.JSON = JSON
 
 return JSON
