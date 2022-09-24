@@ -39,7 +39,7 @@ namespace AdmiralNelsonLordPack {
             "wh_main_brt_carcassonne"
         ]
 
-        private GetLordPoolOnFaction(factionKey: string) : AgentKeyToCount | null {
+        private GetLordPoolOnFaction(factionKey: string) : LordPool | null {
             this.bretLordPool.forEach(element => {
                 if(element.Faction == factionKey) return element
             })
@@ -58,24 +58,27 @@ namespace AdmiralNelsonLordPack {
         FirstTimeSetup(): void {
             if(localStorage.getItem("ADMBRETLORDPACK") != null) {
                 this.l.Log(`version string: ${localStorage.getItem(ADMBRETLORDPACK)}`)
+                this.Load()
                 return
             }
             
             this.l.LogWarn("First time setup")
             localStorage.setItem("ADMBRETLORDPACK", ADMBRETLORDPACK)
             this.l.LogWarn("Save game has been tagged")
-            this.SetupTheLordPool()
+            this.Save()
             
         }
 
-        SetupTheLordPool(): void {
-            if(this.bretLordPool.length > 0) return;
-
+        Save(): void {
             this.BretonnianFactionsKeys.forEach(fac => {
                 this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
             })
             localStorage.setItem(BRETLORDPOOL, JSON.stringify(this.bretLordPool))
             this.l.LogWarn(localStorage.getItem(BRETLORDPOOL))
+        }
+
+        Load() : void {
+
         }
 
         DiceRollCheck(threshold: number, noOfDices: number = 1, side: number = 6) : boolean {
@@ -124,9 +127,14 @@ namespace AdmiralNelsonLordPack {
 
                     this.l.Log(`current bret faction ${factionKey}`)
 
-                    this.LordAgentSubtypes.forEach(key => {
-                        this.SpawnLordToPool(key, factionKey)
-                    });
+                    if(DEBUG) {
+                        this.LordAgentSubtypes.forEach(key => {
+                            this.SpawnLordToPool(key, factionKey)
+                            this.GetLordPoolOnFaction(factionKey)?.IncrementAgentCount(key)
+                        });       
+                        this.Save()                 
+                    }
+
                     
                 },
                 true
