@@ -4,18 +4,19 @@ namespace AdmiralNelsonLordPack {
     const VERSION = 1
     const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
 
+    const HUMAN_THRESHOLD = 20
+    const BOT_THRESHOLD = 10
+    const DICE_NUMBER = 2
+    const DICE_SIDES = 1
+
     class BretLordPack {
-        constructor() {
-            this.FirstTimeSetup()
-            this.Init()
-        }
 
         private readonly l = new Logger("BretLordPack")
 
         private readonly LordAgentSubtypes = [
-            "AdmiralNelsonLordPack_bret_lord_massif_agent_key",
-            "AdmiralNelsonLordPack_bret_lord_massif_sword_shield_agent_key",
-            "AdmiralNelsonLordPack_bret_lord_2handed_agent_key",
+            "admiralnelson_bret_lord_massif_agent_key",
+            "admiralnelson_bret_lord_massif_sword_shield_agent_key",
+            "admiralnelson_bret_lord_2handed_agent_key",
         ]
         
         private readonly BretonnianFactionsKeys = [
@@ -33,9 +34,8 @@ namespace AdmiralNelsonLordPack {
         ]
         
         private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
-            //this.l.LogWarn(debug.traceback())
-            this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool`)
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
+            this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
         }
 
         private SpawnLordToCenter(subtypeKey: string, factionKey: string): void {
@@ -43,19 +43,46 @@ namespace AdmiralNelsonLordPack {
         }
 
         FirstTimeSetup(): void {
-            if(localStorage.getItem(ADMBRETLORDPACK) != null) return
+            if(localStorage.getItem("ADMBRETLORDPACK") != null) {
+                this.l.Log(`version string: ${localStorage.getItem(ADMBRETLORDPACK)}`)
+                return
+            }
             
             this.l.LogWarn("First time setup")
-            this.l.LogWarn(JSON.stringify(this.BretonnianFactionsKeys))
+            localStorage.setItem("ADMBRETLORDPACK", ADMBRETLORDPACK)
+            this.l.LogWarn("Save game has been tagged")
         }
 
-        Init(): void {
-            this.LordAgentSubtypes.forEach(element => {
-                this.l.Log(element)
-            })
+        DiceRollCheck(threshold: number, noOfDices: number = 1, side: number = 6) : boolean {
+            let total = 0
+            for (let i = 1; i <= noOfDices; i++) {
+                total += cm.random_number(side, 1)
+            }
+            return total >= threshold
+        }
 
-            this.l.LogWarn("hello i'm compiled from typescript!")
-            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
+        SpawnLord() : void {
+
+        }
+
+        SetupOnRecruitmentFromPool(): void {
+            core.add_listener(
+                "AdmiralNelsonLordPackOnRecruitmentFromPool",
+                "CharacterRecruited",
+                (context) => {
+                    const subtypeKey = context?.character().character_subtype_key() ?? ""
+                    this.l.Log(`someone was spawned ${subtypeKey}`)
+                    return this.LordAgentSubtypes.indexOf(subtypeKey) >= 0
+                },
+                (context) => {
+                    this.l.LogWarn(`character recruited ${context?.character().character_subtype_key()}`)
+                },
+                true
+            )
+            this.l.Log("SetupOnRecruitmentFromPool ok")
+        }
+
+        SetupOnFactionTurnStart(): void {
             core.add_listener(
                 "AdmiralNelsonLordPackOnTurnBegin", 
                 "FactionTurnStart", 
@@ -72,8 +99,6 @@ namespace AdmiralNelsonLordPack {
 
                     this.l.Log(`current bret faction ${factionKey}`)
 
-                    //const randomNr = cm.random_number(this.LordAgentSubtypes.length - 1, 0)
-                    //const pickedAgentKey = this.LordAgentSubtypes[0]
                     this.LordAgentSubtypes.forEach(key => {
                         this.SpawnLordToPool(key, factionKey)
                     });
@@ -81,8 +106,21 @@ namespace AdmiralNelsonLordPack {
                 },
                 true
             )
+            this.l.Log("SetupOnFactionTurnStart ok")
+        }
 
+        Init(): void {
             
+            this.l.LogWarn("hello i'm compiled from typescript!")
+            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
+            
+            this.SetupOnFactionTurnStart()
+            this.SetupOnRecruitmentFromPool()
+        }
+
+        constructor() {
+            this.FirstTimeSetup()
+            this.Init()
         }
     }
 
