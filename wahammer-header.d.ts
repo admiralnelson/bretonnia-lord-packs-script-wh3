@@ -20,6 +20,9 @@ declare function out(s: string): void
 /** JSON interface: campaign\mod\JSON.lua */
 interface JSON {
     stringify(this: void, o: any): string;
+    /** 
+    * @throws {Error} generic lua error, containing a message
+    */
     parse(this: void, s: string): any;
 }
 
@@ -319,8 +322,10 @@ interface ICharacterDetailsScript extends INullScript {
     get_forename(): string
     get_surname(): string
     character_type(agentKey: string): boolean
+    /** Returns the character's type key, from the agents table */
     character_type_key(): string
     character_subtype(agentSubtypeKey: string): boolean 
+    /** Returns the character's subtype key, from the agents table */
     character_subtype_key(): string
     character_subtype_has_female_name(unknown: any): any
     is_part_of_subtype_set(unknown: any): any
@@ -353,6 +358,7 @@ interface ICharacterDetailsScript extends INullScript {
 }
 
 interface ICampaignManager {
+    null_interface(): any
     /** a function will fire right after loading has finished  */
     add_first_tick_callback(callback: Function): void
     spawn_character_to_pool(faction: string, forename: string, surname: string, clanname: string, othername: string, age: number, male: boolean, agentKey: string, agentSubtypeKey: string, immortal: boolean, artSetKey: string): ICharacterDetailsScript
@@ -366,6 +372,9 @@ interface ICampaignManager {
     char_lookup_str(character: ICharacterScript): string
     set_saved_value(key: string, value: any): void
     get_saved_value(key: string): string|number|object|Array<any>
+    turn_number(): number
+    get_faction(factionKey: string, errorIfNotFound?: boolean): IFactionScript
+    get_character_by_cqi(cqiNo: number): ICharacterScript
 }
 
 /** context of the callback or conditional checks, get your faction, char, etc. from here */
