@@ -201,6 +201,7 @@ interface IFactionScript extends INullScript {
     military_force_list(): IMilitaryForceListScript
     model(): IModelScript
     is_factions_turn(): boolean
+    /** returns true if player is human */
     is_human(): boolean
     is_idle_human(): boolean
     /** returns faction key */
@@ -380,16 +381,16 @@ interface ICampaignManager {
 /** context of the callback or conditional checks, get your faction, char, etc. from here */
 interface IContext {
     /** gets faction interface, could be INullScript */
-    faction() : IFactionScript
-    character(): ICharacterScript
-    character_details(): ICharacterDetailsScript
+    faction?() : IFactionScript
+    character?(): ICharacterScript
+    character_details?(): ICharacterDetailsScript
 }
 
 type ConditionalTest = {
-    (context: IContext | null) : boolean
+    (context: IContext) : boolean
 }
 type Callback = {
-    (context: IContext | null) : void
+    (context: IContext) : void
 }
 
 interface ICore {
