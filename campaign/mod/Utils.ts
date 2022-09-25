@@ -13,4 +13,9 @@ namespace AdmiralNelsonLordPack {
             return cm.set_saved_value(key, null)
         }
     }
+    export function clamp(v: number, min: number, max:number) : number {
+        if(v >= max) return max
+        if(v <= min) return min
+        return v
+    }
 }
