@@ -43,9 +43,9 @@ namespace AdmiralNelsonLordPack {
         ]
 
         private GetLordPoolOnFaction(factionKey: string) : LordPool | null {
-            this.bretLordPool.forEach(element => {
-                if(element.Faction == factionKey) return element
-            })
+           for (const iterator of this.bretLordPool) {
+                if (iterator.Faction == factionKey) return iterator
+           }
             return null
         }
         
@@ -58,33 +58,28 @@ namespace AdmiralNelsonLordPack {
 
         }
 
-        FirstTimeSetup(): void {
-            if(localStorage.getItem(TAG_VERSIONSTRING) != null) {
-                this.l.Log(`version string: ${localStorage.getItem(TAG_VERSIONSTRING)}`)
-                this.localVersion = (localStorage.getItem(TAG_VERSIONSTRING) as string).substring(17)
-
-                this.l.Log(`system is set to version ${this.localVersion}`)
-                this.Load()
-                return
-            }
-            
-            this.l.LogWarn("First time setup")
-            localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
-            this.l.LogWarn("Save game has been tagged")
-            this.Save()
-            
-        }
-
         Save(): void {
-            this.BretonnianFactionsKeys.forEach(fac => {
-                this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
-            })
             localStorage.setItem(TAG_BRETLORDPOOL, JSON.stringify(this.bretLordPool))
             this.l.LogWarn(localStorage.getItem(TAG_BRETLORDPOOL) as string)
+            this.l.LogWarn("Saved")
         }
 
         Load() : void {
-
+            if(localStorage.getItem(TAG_BRETLORDPOOL) == null) {
+                this.l.LogError(`Failed to load ${TAG_BRETLORDPOOL}`)
+                return
+            }
+            const bretLordPoolJson = localStorage.getItem(TAG_BRETLORDPOOL) as string
+            const bretLordPoolArr = JSON.parse(bretLordPoolJson)
+            print(bretLordPoolArr)
+            this.bretLordPool.length = 0
+            for (const iterator of bretLordPoolArr) {
+                const factionKey = iterator["FactionKey"]
+                const lordAgentSubtypeToCount = iterator["LordAgentSubtypeToCount"]
+                this.bretLordPool.push(new LordPool(factionKey, undefined, lordAgentSubtypeToCount))
+            }
+            this.l.LogWarn(JSON.stringify(this.bretLordPool))
+            this.l.LogWarn("Loaded")
         }
 
         DiceRollCheck(threshold: number, noOfDices: number = 1, side: number = 6) : boolean {
@@ -99,21 +94,33 @@ namespace AdmiralNelsonLordPack {
 
         }
 
-        SetupOnRecruitmentFromPool(): void {
-            core.add_listener(
-                "AdmiralNelsonLordPackOnRecruitmentFromPool",
-                "CharacterRecruited",
-                (context) => {
-                    const subtypeKey = context?.character().character_subtype_key() ?? ""
-                    this.l.Log(`someone was spawned ${subtypeKey}`)
-                    return this.LordAgentSubtypes.indexOf(subtypeKey) >= 0
-                },
-                (context) => {
-                    this.l.LogWarn(`character recruited ${context?.character().character_subtype_key()}`)
-                },
-                true
-            )
-            this.l.Log("SetupOnRecruitmentFromPool ok")
+        Init(): void {
+            
+            this.l.LogWarn("hello i'm compiled from typescript!")
+            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
+            
+            this.FirstTimeSetup()
+            this.SetupOnFactionTurnStart()
+            this.SetupOnRecruitmentFromPool()
+        }
+
+        FirstTimeSetup(): void {
+            if(localStorage.getItem(TAG_VERSIONSTRING) != null) {
+                this.localVersion = localStorage.getItem(TAG_VERSIONSTRING) as string
+                print(this.localVersion)
+                this.l.Log(`system is set to version ${this.localVersion}`)
+                this.Load()
+                return
+            }
+            
+            this.l.LogWarn("First time setup")
+            localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
+            this.l.LogWarn("Save game has been tagged")
+            this.BretonnianFactionsKeys.forEach(fac => {
+                this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
+            })
+            this.l.LogWarn("Bret lord pool json has been saved")
+            this.Save()
         }
 
         SetupOnFactionTurnStart(): void {
@@ -133,35 +140,37 @@ namespace AdmiralNelsonLordPack {
 
                     this.l.Log(`current bret faction ${factionKey}`)
 
-                    if(DEBUG) {
+                    if(false) {
                         this.LordAgentSubtypes.forEach(key => {
                             this.SpawnLordToPool(key, factionKey)
                             this.GetLordPoolOnFaction(factionKey)?.IncrementAgentCount(key)
                         });       
                         this.Save()                 
                     }
-
-                    
                 },
                 true
             )
             this.l.Log("SetupOnFactionTurnStart ok")
         }
 
-        Init(): void {
-            
-            this.l.LogWarn("hello i'm compiled from typescript!")
-            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
-            
-            this.SetupOnFactionTurnStart()
-            this.SetupOnRecruitmentFromPool()
+        SetupOnRecruitmentFromPool(): void {
+            core.add_listener(
+                "AdmiralNelsonLordPackOnRecruitmentFromPool",
+                "CharacterRecruited",
+                (context) => {
+                    const subtypeKey = context?.character().character_subtype_key() ?? ""
+                    this.l.Log(`someone was spawned ${subtypeKey}`)
+                    return this.LordAgentSubtypes.indexOf(subtypeKey) >= 0
+                },
+                (context) => {
+                    this.l.LogWarn(`character recruited ${context?.character().character_subtype_key()}`)
+                },
+                true
+            )
+            this.l.Log("SetupOnRecruitmentFromPool ok")
         }
 
         constructor() {
-            this.l.LogWarn("hello i'm compiled from typescript!")
-            this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
-
-            this.FirstTimeSetup()
             this.Init()
         }
     }
