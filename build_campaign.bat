@@ -18,7 +18,7 @@ if %ERRORLEVEL% NEQ 0 (
 robocopy script *.lua /s /V /XD .git script node_modules .vscode /XF *.ts > NUL
 copy runtime\*.* script\campaign\mod > NUL
 mkdir script\_lib 2> NUL
-move script\lualib_bundle.lua script\_lib\lualib_bundle.lua > NUL
+rem move script\lualib_bundle.lua script\_lib\lualib_bundle.lua > NUL
 echo checking for unsupported Typescript construct such as new Array
 findstr /s /n /r "__TS__New\(Array." script\*.*
 if %ERRORLEVEL% NEQ 1 (
