@@ -113,7 +113,10 @@ namespace AdmiralNelsonLordPack {
                 const roll = cm.random_number(1, 0) 
                 const whichAgentToChoose = this.LordAgentSubtypes[roll]
                 //check its pool before going further, we don't want to spam the recruitment tab 
-                if(lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
+                if(lordPool.GetAgentCount(whichAgentToChoose) < 2 && isFactionHuman) {
+                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                } else if (lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
                     this.SpawnLordToPool(whichAgentToChoose, factionKey)
                     this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
                 } else {
@@ -127,7 +130,10 @@ namespace AdmiralNelsonLordPack {
                 isFactionHuman ? this.l.Log("Faction is human, roll success") : this.l.Log("Faction is bot, roll success")
                 const whichAgentToChoose = this.LordAgentSubtypes[2]
                 //check its pool before going further, we don't want to spam the recruitment tab 
-                if(lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
+                if(lordPool.GetAgentCount(whichAgentToChoose) < 2 && isFactionHuman) {
+                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                    this.l.LogWarn(`2handed lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                } else if (lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
                     this.SpawnLordToPool(whichAgentToChoose, factionKey)
                     this.l.LogWarn(`2handed lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
                 } else {
