@@ -2,7 +2,7 @@
 
 setlocal enabledelayedexpansion
 
-if not exist runtime\JSON.lua (
+if not exist runtime\TypescriptJSON.lua (
     call powershell "[Reflection.Assembly]::LoadWithPartialName("""System.Windows.Forms""");[Windows.Forms.MessageBox]::show("""Cannot find hardcoded reference to runtime\JSON.lua, it doesn't exist""", """Compilation Error""", 0, 16)" > NUL
     goto :pause
 )
