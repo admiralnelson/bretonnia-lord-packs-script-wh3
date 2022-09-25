@@ -371,7 +371,7 @@ interface ICampaignManager {
     force_add_skill(stringLookUp: string, skillKey: string): void
     char_lookup_str(character: ICharacterScript): string
     set_saved_value(key: string, value: any): void
-    get_saved_value(key: string): string|number|object|Array<any>
+    get_saved_value(key: string): unknown 
     turn_number(): number
     get_faction(factionKey: string, errorIfNotFound?: boolean): IFactionScript
     get_character_by_cqi(cqiNo: number): ICharacterScript
