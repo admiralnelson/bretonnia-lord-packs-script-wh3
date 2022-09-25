@@ -7,7 +7,10 @@ This mod employs script to spawn these rare variants:
 
 # How to build?
 Run first time bat and to compile, run build_campaign.bat. You still need to pack the script manually. 
-3d assets and database can be downloaded here https://steamcommunity.com/sharedfiles/filedetails/?id=2867514081
+3d assets and database can be downloaded here https://steamcommunity.com/sharedfiles/filedetails/?id=2867514081     
+
+# Warhammer-header.d.ts
+Yeah, there are lots of function needs to be included here, I'm not even working on UI stuff. 
 
 # Notice
 - This game modifies your save game, once enabled, you can't remove it.
