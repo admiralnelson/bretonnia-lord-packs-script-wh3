@@ -3,7 +3,9 @@ namespace AdmiralNelsonLordPack {
     const DEBUG = true
     const VERSION = 1
     const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
-    const BRETLORDPOOL = "BRETLORDPOOL"
+
+    const TAG_BRETLORDPOOL = "BRETLORDPOOL"
+    const TAG_VERSIONSTRING = "ADMBRETLORDPACK"
 
     const HUMAN_THRESHOLD = 20
     const BOT_THRESHOLD = 10
@@ -12,6 +14,7 @@ namespace AdmiralNelsonLordPack {
 
     class BretLordPack {
 
+        private localVersion = ADMBRETLORDPACK
         private readonly l = new Logger("BretLordPack")
         // ok
         private bretLordPool : Array<LordPool> = []
@@ -56,14 +59,17 @@ namespace AdmiralNelsonLordPack {
         }
 
         FirstTimeSetup(): void {
-            if(localStorage.getItem("ADMBRETLORDPACK") != null) {
-                this.l.Log(`version string: ${localStorage.getItem(ADMBRETLORDPACK)}`)
+            if(localStorage.getItem(TAG_VERSIONSTRING) != null) {
+                this.l.Log(`version string: ${localStorage.getItem(TAG_VERSIONSTRING)}`)
+                this.localVersion = (localStorage.getItem(TAG_VERSIONSTRING) as string).substring(17)
+
+                this.l.Log(`system is set to version ${this.localVersion}`)
                 this.Load()
                 return
             }
             
             this.l.LogWarn("First time setup")
-            localStorage.setItem("ADMBRETLORDPACK", ADMBRETLORDPACK)
+            localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
             this.l.LogWarn("Save game has been tagged")
             this.Save()
             
@@ -73,8 +79,8 @@ namespace AdmiralNelsonLordPack {
             this.BretonnianFactionsKeys.forEach(fac => {
                 this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
             })
-            localStorage.setItem(BRETLORDPOOL, JSON.stringify(this.bretLordPool))
-            this.l.LogWarn(localStorage.getItem(BRETLORDPOOL))
+            localStorage.setItem(TAG_BRETLORDPOOL, JSON.stringify(this.bretLordPool))
+            this.l.LogWarn(localStorage.getItem(TAG_BRETLORDPOOL) as string)
         }
 
         Load() : void {
