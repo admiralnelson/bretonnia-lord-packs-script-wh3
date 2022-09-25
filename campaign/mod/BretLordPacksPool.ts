@@ -1,17 +1,23 @@
 namespace AdmiralNelsonLordPack {
     export type AgentKeyToCount = LuaMap<string, number>
-
     export class LordPool {
         private FactionKey = ""
         private LordAgentSubtypeToCount : AgentKeyToCount = new LuaMap<string, number>
 
-        constructor(factionkey?: string, agentSubtypes?: Array<string>){
+        constructor(factionkey?: string, agentSubtypes?: Array<string>, agentSubtypesToCount?: LuaMap<string, number>){
             this.FactionKey = factionkey ?? "";
 
-            if(agentSubtypes == null) return;
-            agentSubtypes.forEach(agent => {
-                this.LordAgentSubtypeToCount.set(agent, 0)
-            })
+            if(agentSubtypes != null) {
+                agentSubtypes.forEach(agent => {
+                    this.LordAgentSubtypeToCount.set(agent, 0)
+                })
+            }
+
+            if(agentSubtypesToCount != null) {
+                for (const key in agentSubtypesToCount) {
+                    this.LordAgentSubtypeToCount.set(key, agentSubtypesToCount.get(key) ?? 0)
+                }    
+            }
         }
 
         IncrementAgentCount(agentkey: string): void {
