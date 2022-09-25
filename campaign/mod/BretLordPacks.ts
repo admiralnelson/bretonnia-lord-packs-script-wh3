@@ -7,10 +7,14 @@ namespace AdmiralNelsonLordPack {
     const TAG_BRETLORDPOOL = "BRETLORDPOOL"
     const TAG_VERSIONSTRING = "ADMBRETLORDPACK"
 
-    const HUMAN_THRESHOLD = 20
-    const BOT_THRESHOLD = 10
-    const DICE_NUMBER = 2
-    const DICE_SIDES = 1
+    const BOT_2HANDED_LORD_THRESHOLD = 18
+    const BOT_MASSIF_LORD_THRESHOLD = 18
+
+    const HUMAN_MASSIF_LORD_THRESHOLD = 32
+    const HUMAN_2HANDED_LORD_THRESHOLD = 28
+
+    const DICE_NUMBER = 20
+    const DICE_SIDES = 2
 
     class BretLordPack {
 
@@ -48,15 +52,6 @@ namespace AdmiralNelsonLordPack {
            }
             return null
         }
-        
-        private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
-            cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
-            this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
-        }
-
-        private SpawnLordToCenter(subtypeKey: string, factionKey: string): void {
-
-        }
 
         Save(): void {
             localStorage.setItem(TAG_BRETLORDPOOL, JSON.stringify(this.bretLordPool))
@@ -90,8 +85,69 @@ namespace AdmiralNelsonLordPack {
             return total >= threshold
         }
 
-        SpawnLord() : void {
+        private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
+            cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
+            this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
 
+            const lordPool = this.GetLordPoolOnFaction(factionKey)
+            if(lordPool == null) return
+            lordPool.IncrementAgentCount(subtypeKey)
+            this.Save()
+        }
+
+        AttemptToSpawnLord(faction: IFactionScript): void {
+            const factionKey = faction.name()
+            const isFactionHuman = faction.is_human()
+            
+            const lordPool = this.GetLordPoolOnFaction(factionKey)
+            if(lordPool == null) {
+                this.l.LogError("Failed to AttemptToSpawnLord, lordPool appears to be null. has Load() called before?")
+                return
+            }
+            
+            this.l.Log(`AttemptToSpawnLord: current bret faction ${factionKey}`)            
+
+            //try to spawn the big guy
+            if(this.DiceRollCheck(isFactionHuman ? HUMAN_MASSIF_LORD_THRESHOLD : BOT_MASSIF_LORD_THRESHOLD, DICE_NUMBER, DICE_SIDES)) {
+                isFactionHuman ? this.l.Log("Faction is human, roll success") : this.l.Log("Faction is bot, roll success")
+                const roll = cm.random_number(1, 0) 
+                const whichAgentToChoose = this.LordAgentSubtypes[roll]
+                //check its pool before going further, we don't want to spam the recruitment tab 
+                if(lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
+                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                } else {
+                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} cannot spawned into pool ${factionKey} because it's full (more than 2)`)
+                }
+                
+                return
+            }
+            //try to spawn the 2handed guy instead
+            if(this.DiceRollCheck(isFactionHuman ? HUMAN_2HANDED_LORD_THRESHOLD : BOT_2HANDED_LORD_THRESHOLD, DICE_NUMBER, DICE_SIDES)) {
+                isFactionHuman ? this.l.Log("Faction is human, roll success") : this.l.Log("Faction is bot, roll success")
+                const whichAgentToChoose = this.LordAgentSubtypes[2]
+                //check its pool before going further, we don't want to spam the recruitment tab 
+                if(lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
+                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                    this.l.LogWarn(`2handed lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                } else {
+                    this.l.LogWarn(`2handed lord with a subtype ${whichAgentToChoose} cannot spawned into pool ${factionKey} because it's full (more than 2)`)
+                }
+                
+                return
+            }
+            
+        }
+
+        OnLordSpanedFromPool(agent: ICharacterScript): void {
+            const agentSubtypeKey = agent.character_subtype_key()
+            const factionKey = agent.faction().name()
+            this.l.LogWarn(`character recruited ${agentSubtypeKey}`)
+            const thePool = this.GetLordPoolOnFaction(factionKey)
+            if(thePool) {
+                thePool.DecrementAgentCount(agentSubtypeKey)
+                this.Save()
+            }
         }
 
         Init(): void {
@@ -110,6 +166,7 @@ namespace AdmiralNelsonLordPack {
                 print(this.localVersion)
                 this.l.Log(`system is set to version ${this.localVersion}`)
                 this.Load()
+                this.l.Log("FirstTimeSetup ok - existing campaign")
                 return
             }
             
@@ -119,8 +176,9 @@ namespace AdmiralNelsonLordPack {
             this.BretonnianFactionsKeys.forEach(fac => {
                 this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
             })
-            this.l.LogWarn("Bret lord pool json has been saved")
             this.Save()
+            this.l.LogWarn("Bret lord pool json has been saved")
+            this.l.Log("FirstTimeSetup ok")
         }
 
         SetupOnFactionTurnStart(): void {
@@ -128,25 +186,14 @@ namespace AdmiralNelsonLordPack {
                 "AdmiralNelsonLordPackOnTurnBegin", 
                 "FactionTurnStart", 
                 (context) => {
-                    const faction = context ? context.faction().name() : ""
+                    const faction = context.faction ? context.faction().name() : ""
                     return this.BretonnianFactionsKeys.indexOf(faction) >= 0
                 },
                 (context) => {
-                    const factionKey = context ? context.faction().name() : ""
-                    if(factionKey == "") {
-                        this.l.LogError(`should not happen!`)
-                        return
-                    }
+                    const theFaction = context.faction ? context.faction() : null
+                    if(theFaction == null) return
 
-                    this.l.Log(`current bret faction ${factionKey}`)
-
-                    if(false) {
-                        this.LordAgentSubtypes.forEach(key => {
-                            this.SpawnLordToPool(key, factionKey)
-                            this.GetLordPoolOnFaction(factionKey)?.IncrementAgentCount(key)
-                        });       
-                        this.Save()                 
-                    }
+                    this.AttemptToSpawnLord(theFaction)
                 },
                 true
             )
@@ -158,12 +205,18 @@ namespace AdmiralNelsonLordPack {
                 "AdmiralNelsonLordPackOnRecruitmentFromPool",
                 "CharacterRecruited",
                 (context) => {
-                    const subtypeKey = context?.character().character_subtype_key() ?? ""
+                    const theChar = context.character ? context.character() : null
+                    if(theChar == null) return false
+
+                    const subtypeKey = theChar.character_subtype_key()
                     this.l.Log(`someone was spawned ${subtypeKey}`)
                     return this.LordAgentSubtypes.indexOf(subtypeKey) >= 0
                 },
                 (context) => {
-                    this.l.LogWarn(`character recruited ${context?.character().character_subtype_key()}`)
+                    const theChar = context.character ? context.character() : null
+                    if(theChar == null) return false
+                    
+                    this.OnLordSpanedFromPool(theChar)
                 },
                 true
             )
