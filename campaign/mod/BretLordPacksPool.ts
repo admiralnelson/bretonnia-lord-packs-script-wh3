@@ -29,9 +29,13 @@ namespace AdmiralNelsonLordPack {
         
         DecrementAgentCount(agentkey: string): void {
             if (this.LordAgentSubtypeToCount.has(agentkey)) {
-                const val =  this.LordAgentSubtypeToCount.get(agentkey) ?? 1
-                this.LordAgentSubtypeToCount.set(agentkey, val - 1)
+                const  val =  this.LordAgentSubtypeToCount.get(agentkey) ?? 1
+                this.LordAgentSubtypeToCount.set(agentkey, clamp(val - 1, 0, 100))
             }
+        }
+
+        GetAgentCount(agentkey: string): number {
+            return this.LordAgentSubtypeToCount.get(agentkey) ?? -1
         }
 
         public get AgentKeysToCounts() : ReadonlyLuaMap<string, number> {
