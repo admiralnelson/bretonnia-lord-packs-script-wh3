@@ -21,7 +21,7 @@ namespace AdmiralNelsonLordPack {
         private localVersion = ADMBRETLORDPACK
         private readonly l = new Logger("BretLordPack")
         // ok
-        private bretLordPool : Array<LordPool> = []
+        private bretLordPool : LordPool[] = []
         // NOT SUPPORTED
         // private bretLordPool : Array<LordPool> = new Array
         // private bretLordPool = new Array<LordPool> 

@@ -1,5 +1,5 @@
 /** @noSelfInFile */
-
+/* eslint-disable */
 
 declare function print(...args: any[]): void
 /**

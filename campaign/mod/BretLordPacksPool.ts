@@ -4,7 +4,7 @@ namespace AdmiralNelsonLordPack {
         private FactionKey = ""
         private LordAgentSubtypeToCount : AgentKeyToCount = new LuaMap<string, number>
 
-        constructor(factionkey?: string, agentSubtypes?: Array<string>, agentSubtypesToCount?: LuaMap<string, number>){
+        constructor(factionkey?: string, agentSubtypes?: string[], agentSubtypesToCount?: LuaMap<string, number>){
             this.FactionKey = factionkey ?? "";
 
             if(agentSubtypes != null) {
