@@ -188,6 +188,7 @@ namespace AdmiralNelsonLordPack {
             this.FirstTimeSetup()
             this.SetupOnFactionTurnStart()
             this.SetupOnRecruitmentFromPool()
+            this.SetupOnTurnToResetPool()
         }
 
         FirstTimeSetup(): void {
@@ -277,6 +278,7 @@ namespace AdmiralNelsonLordPack {
                 },
                 true
             )
+            this.l.Log("SetupOnTurnToResetPool ok")
         }
 
         constructor() {
