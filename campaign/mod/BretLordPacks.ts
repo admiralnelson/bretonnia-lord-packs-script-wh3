@@ -1,24 +1,31 @@
 namespace AdmiralNelsonLordPack {
 
+    export const VERSION = 2
+    export const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
+
+    export const TAG_BRETLORDPOOL = "BRETLORDPOOL"
+    export const TAG_VERSIONSTRING = "ADMBRETLORDPACK"
+
+    const RESET_EACH_TURN = 10
     const DEBUG = true
-    const VERSION = 1
-    const ADMBRETLORDPACK = "ADMBRETLORDPACK:v"+VERSION
 
-    const TAG_BRETLORDPOOL = "BRETLORDPOOL"
-    const TAG_VERSIONSTRING = "ADMBRETLORDPACK"
-
-    const BOT_2HANDED_LORD_THRESHOLD = 24
-    const BOT_MASSIF_LORD_THRESHOLD = 21
+    const BOT_2HANDED_LORD_THRESHOLD = 26
+    const BOT_MASSIF_LORD_THRESHOLD = 26
 
     const HUMAN_MASSIF_LORD_THRESHOLD = 32
-    const HUMAN_2HANDED_LORD_THRESHOLD = 28
+    const HUMAN_2HANDED_LORD_THRESHOLD = 29
 
     const DICE_NUMBER = 20
     const DICE_SIDES = 2
 
+    const RESET_POOL_COUNT_THRESHOLD = 10
+
     class BretLordPack {
 
         private localVersion = ADMBRETLORDPACK
+
+        private failedCounter = 0
+
         private readonly l = new Logger("BretLordPack")
         // ok
         private bretLordPool : LordPool[] = []
@@ -85,7 +92,15 @@ namespace AdmiralNelsonLordPack {
             return total >= threshold
         }
 
-        private SpawnLordToPool(subtypeKey: string, factionKey: string): void {
+        ResetPool(): void {
+            for (const iterator of this.bretLordPool) {
+                iterator.Reset()
+            }
+            this.l.LogWarn("Lord pool has been reset")
+            this.Save()
+        }
+
+        SpawnLordToPool(subtypeKey: string, factionKey: string): void {
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
             this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
 
@@ -113,7 +128,8 @@ namespace AdmiralNelsonLordPack {
                 const roll = cm.random_number(1, 0) 
                 const whichAgentToChoose = this.LordAgentSubtypes[roll]
                 //check its pool before going further, we don't want to spam the recruitment tab 
-                if(lordPool.GetAgentCount(whichAgentToChoose) < 2 && isFactionHuman) {
+                //player can only get 1 (one) brute lord
+                if(lordPool.GetAgentCount(whichAgentToChoose) <= 1 && isFactionHuman) {
                     this.SpawnLordToPool(whichAgentToChoose, factionKey)
                     this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
                 } else if (lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
@@ -156,6 +172,14 @@ namespace AdmiralNelsonLordPack {
             }
         }
 
+        OnTurnToResetPool(): void {
+            this.l.Log(`current turn is ${cm.turn_number()} will reset in each multiplication of turns ${RESET_EACH_TURN}`)
+            if(cm.turn_number() % RESET_EACH_TURN == 0) {
+                this.ResetPool()
+                this.Save()
+            }
+        }
+
         Init(): void {
             
             this.l.LogWarn("hello i'm compiled from typescript!")
@@ -168,6 +192,20 @@ namespace AdmiralNelsonLordPack {
 
         FirstTimeSetup(): void {
             if(localStorage.getItem(TAG_VERSIONSTRING) != null) {
+                const savedGameVersion = localStorage.getItem(TAG_VERSIONSTRING) as string
+                if(ADMBRETLORDPACK != savedGameVersion) {
+                    this.l.LogWarn(`Mismatched save game version, attempting to upgrade from ${savedGameVersion} to ${ADMBRETLORDPACK}`)
+                                        
+                    if(cm.turn_number() > 15) {
+                        this.l.LogWarn(`Attempting to load...`)
+                        this.Load()
+                        this.l.LogWarn(`Turn number is above > 15, Resetting it now`)
+                        this.ResetPool()
+                        this.Save()
+                    }
+                    this.l.LogWarn(`changing the game version from ${savedGameVersion} to ${ADMBRETLORDPACK}`)
+                    localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
+                }
                 this.localVersion = localStorage.getItem(TAG_VERSIONSTRING) as string
                 print(this.localVersion)
                 this.l.Log(`system is set to version ${this.localVersion}`)
@@ -229,12 +267,22 @@ namespace AdmiralNelsonLordPack {
             this.l.Log("SetupOnRecruitmentFromPool ok")
         }
 
+        SetupOnTurnToResetPool(): void {
+            core.add_listener(
+                "AdmiralNelsonLordPackSetupOnTurnToResetPool",
+                "EndOfRound",
+                true,
+                (_) => {
+                    this.OnTurnToResetPool()
+                },
+                true
+            )
+        }
+
         constructor() {
-            this.Init()
+            cm.add_first_tick_callback( () => { this.Init() })
         }
     }
-
-    cm.add_first_tick_callback( () => {
-        new BretLordPack()
-    })
+    
+    new BretLordPack()
 }

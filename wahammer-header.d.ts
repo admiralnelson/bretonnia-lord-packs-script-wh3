@@ -373,6 +373,7 @@ interface ICampaignManager {
     char_lookup_str(character: ICharacterScript): string
     set_saved_value(key: string, value: any): void
     get_saved_value(key: string): unknown 
+    /** returns current turn number */
     turn_number(): number
     get_faction(factionKey: string, errorIfNotFound?: boolean): IFactionScript
     get_character_by_cqi(cqiNo: number): ICharacterScript

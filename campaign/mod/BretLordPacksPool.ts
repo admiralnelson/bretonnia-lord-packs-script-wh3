@@ -20,6 +20,12 @@ namespace AdmiralNelsonLordPack {
             }
         }
 
+        Reset(): void {
+            for (const key in this.LordAgentSubtypeToCount) {
+                this.LordAgentSubtypeToCount.set(key, 0)
+            }    
+        }
+
         IncrementAgentCount(agentkey: string): void {
             if (this.LordAgentSubtypeToCount.has(agentkey)) {
                 const val =  this.LordAgentSubtypeToCount.get(agentkey) ?? -1
