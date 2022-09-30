@@ -152,7 +152,7 @@ interface IMilitaryForceScript extends INullScript {
     bonus_values(): IBonusValuesScript
     is_set_piece_battle_army(): boolean
     /** returns battle_set_piece_armies record key for this military force. Will be empty if this is not a quest battle army */
-    set_piece_battle_army_key(): boolean
+    set_piece_battle_army_key(): string
     has_access_to_military_force_mercenary_pool_of_recruitment_source(recruitmentSourceKey: string): boolean
     lookup_streak_value(streakKey: string): number
 }
