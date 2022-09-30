@@ -50,12 +50,17 @@ interface IRegionListScript extends INullScript {
 
 }
 
-interface ICharacterListScript extends IListScript {
+interface IUnitListScript extends IListScript {
+    has_unit(unitKey: string): string
+    item_at(index: number): IUnitScript
+}
 
+interface ICharacterListScript extends IListScript {
+    item_at(index: number): ICharacterScript
 }
 
 interface IMilitaryForceListScript extends IListScript {
-
+    item_at(index: number): IMilitaryForceScript
 }
 
 interface IFactionListScript extends IListScript {
@@ -106,8 +111,50 @@ interface IRegionDataScript extends INullScript {
 
 }
 
-interface IMilitaryForceScript extends INullScript {
+interface IUnitScript extends INullScript {
 
+}
+
+interface IMilitaryForceTypeScript extends INullScript {
+
+}
+
+interface IMilitaryForceScript extends INullScript {
+    command_queue_index(): number
+    has_general(): boolean
+    is_army(): boolean
+    is_navy(): boolean
+    model(): IModelScript
+    unit_list(): IUnitListScript
+    character_list(): ICharacterListScript
+    general_character(): ICharacterScript
+    faction(): IFactionScript
+    has_garrison_residence(): boolean
+    garrison_residence(): IGarrisonResidenceScript
+    contains_mercenaries(): boolean
+    upkeep(): number
+    active_stance(): string
+    can_activate_stance(whatStance: string): boolean
+    morale(): number
+    /** returns true if force is a garrison */
+    is_armed_citizenry(): boolean
+    will_suffer_any_attrition(): boolean
+    can_recruit_agent_at_force(subagentKey: string): boolean
+    can_recruit_unit(unitKey: string): boolean
+    can_recruit_unit_class(unitClass: string): boolean
+    can_recruit_unit_category(unitCategory: string): boolean
+    /** returns army strength */
+    strength(): number
+    has_effect_bundle(bundleKey: string): boolean
+    effect_bundles(): IEffectBundleListScript
+    force_type(): IMilitaryForceTypeScript
+    pooled_resource_manager(): IPooledResourceManager
+    bonus_values(): IBonusValuesScript
+    is_set_piece_battle_army(): boolean
+    /** returns battle_set_piece_armies record key for this military force. Will be empty if this is not a quest battle army */
+    set_piece_battle_army_key(): boolean
+    has_access_to_military_force_mercenary_pool_of_recruitment_source(recruitmentSourceKey: string): boolean
+    lookup_streak_value(streakKey: string): number
 }
 
 interface ICharacterScript extends INullScript, ICharacterDetailsScript, IModelScript {
