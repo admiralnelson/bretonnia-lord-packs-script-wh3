@@ -8,6 +8,8 @@ namespace AdmiralNelsonLordPack {
 
     const RESET_EACH_TURN = 10
     const DEBUG = true
+    
+    const MAXIMUM_BIG_LORDS = 6
 
     const BOT_2HANDED_LORD_THRESHOLD = 26
     const BOT_MASSIF_LORD_THRESHOLD = 26
@@ -24,8 +26,6 @@ namespace AdmiralNelsonLordPack {
 
         private localVersion = ADMBRETLORDPACK
 
-        private failedCounter = 0
-
         private readonly l = new Logger("BretLordPack")
         // ok
         private bretLordPool : LordPool[] = []
@@ -33,11 +33,15 @@ namespace AdmiralNelsonLordPack {
         // private bretLordPool : Array<LordPool> = new Array
         // private bretLordPool = new Array<LordPool> 
 
-        private readonly LordAgentSubtypes = [
+        
+        private readonly BigLordsSubtypes = [
             "admiralnelson_bret_lord_massif_agent_key",
             "admiralnelson_bret_lord_massif_sword_shield_agent_key",
-            "admiralnelson_bret_lord_2handed_agent_key",
         ]
+
+        private readonly LordAgentSubtypes = this.BigLordsSubtypes.concat([
+            "admiralnelson_bret_lord_2handed_agent_key",
+        ])
         
         private readonly BretonnianFactionsKeys = [
             "wh2_dlc14_brt_chevaliers_de_lyonesse",
@@ -54,9 +58,9 @@ namespace AdmiralNelsonLordPack {
         ]
 
         private GetLordPoolOnFaction(factionKey: string) : LordPool | null {
-           for (const iterator of this.bretLordPool) {
+            for (const iterator of this.bretLordPool) {
                 if (iterator.Faction == factionKey) return iterator
-           }
+            }
             return null
         }
 
@@ -100,6 +104,20 @@ namespace AdmiralNelsonLordPack {
             this.Save()
         }
 
+        CountBigLords(faction: IFactionScript): number {
+            let bigGuyCount = 0
+            const armies = faction.military_force_list()
+            for (let i = 0; i < armies.num_items() ; i++) {
+                const theArmy = armies.item_at(i)
+                if(!theArmy.is_armed_citizenry() && theArmy.has_general()) {
+                    const theGeneral = theArmy.general_character()
+                    //this.l.Log(`iterating ${theGeneral.character_subtype_key()}`)
+                    if(this.BigLordsSubtypes.indexOf(theGeneral.character_subtype_key()) >= 0) bigGuyCount++
+                }
+            }
+            return bigGuyCount            
+        }
+
         SpawnLordToPool(subtypeKey: string, factionKey: string): void {
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
             this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
@@ -125,20 +143,27 @@ namespace AdmiralNelsonLordPack {
             //try to spawn the big guy
             if(this.DiceRollCheck(isFactionHuman ? HUMAN_MASSIF_LORD_THRESHOLD : BOT_MASSIF_LORD_THRESHOLD, DICE_NUMBER, DICE_SIDES)) {
                 isFactionHuman ? this.l.Log("Faction is human, roll success") : this.l.Log("Faction is bot, roll success")
-                const roll = cm.random_number(1, 0) 
-                const whichAgentToChoose = this.LordAgentSubtypes[roll]
-                //check its pool before going further, we don't want to spam the recruitment tab 
-                //player can only get 1 (one) brute lord
-                if(lordPool.GetAgentCount(whichAgentToChoose) <= 1 && isFactionHuman) {
-                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
-                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
-                } else if (lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
-                    this.SpawnLordToPool(whichAgentToChoose, factionKey)
-                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+
+                //count big lords
+                const bigLordsTotal = this.CountBigLords(faction)
+                this.l.LogWarn(`there are ${bigLordsTotal} in this faction ${faction.name()}`)
+                if(bigLordsTotal <= MAXIMUM_BIG_LORDS) {
+                    const roll = cm.random_number(1, 0) 
+                    const whichAgentToChoose = this.LordAgentSubtypes[roll]
+                    //check its pool before going further, we don't want to spam the recruitment tab 
+                    //player can only get 1 (one) brute lord
+                    if(lordPool.GetAgentCount(whichAgentToChoose) <= 1 && isFactionHuman) {
+                        this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                        this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                    } else if (lordPool.GetAgentCount(whichAgentToChoose) <= 2) {
+                        this.SpawnLordToPool(whichAgentToChoose, factionKey)
+                        this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} spawned into pool ${factionKey}`)
+                    } else {
+                        this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} cannot spawned into pool ${factionKey} because it's full (more than 2)`)
+                    }
                 } else {
-                    this.l.LogWarn(`big lord with a subtype ${whichAgentToChoose} cannot spawned into pool ${factionKey} because it's full (more than 2)`)
+                    this.l.LogWarn(`faction ${faction.name()} has reached maximum number of big lords. not spawning!`)
                 }
-                
                 return
             }
             //try to spawn the 2handed guy instead
@@ -174,17 +199,14 @@ namespace AdmiralNelsonLordPack {
 
         OnTurnToResetPool(): void {
             this.l.Log(`current turn is ${cm.turn_number()} will reset in each multiplication of turns ${RESET_EACH_TURN}`)
-            if(cm.turn_number() % RESET_EACH_TURN == 0) {
-                this.ResetPool()
-                this.Save()
-            }
+            if(cm.turn_number() % RESET_EACH_TURN == 0) this.ResetPool()
         }
 
         Init(): void {
             
             this.l.LogWarn("hello i'm compiled from typescript!")
             this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
-            
+            this.l.LogWarn(`${JSON.stringify(this.LordAgentSubtypes)}`)
             this.FirstTimeSetup()
             this.SetupOnFactionTurnStart()
             this.SetupOnRecruitmentFromPool()
@@ -202,7 +224,6 @@ namespace AdmiralNelsonLordPack {
                         this.Load()
                         this.l.LogWarn(`Turn number is above > 15, Resetting it now`)
                         this.ResetPool()
-                        this.Save()
                     }
                     this.l.LogWarn(`changing the game version from ${savedGameVersion} to ${ADMBRETLORDPACK}`)
                     localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
