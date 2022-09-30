@@ -14,11 +14,11 @@ namespace AdmiralNelsonLordPack {
     const BOT_2HANDED_LORD_THRESHOLD = 26
     const BOT_MASSIF_LORD_THRESHOLD = 26
 
-    const HUMAN_MASSIF_LORD_THRESHOLD = 32
+    const HUMAN_MASSIF_LORD_THRESHOLD = 33
     const HUMAN_2HANDED_LORD_THRESHOLD = 29
 
-    const DICE_NUMBER = 20
-    const DICE_SIDES = 2
+    const DICE_NUMBER = 2
+    const DICE_SIDES = 20
 
     const RESET_POOL_COUNT_THRESHOLD = 10
 
