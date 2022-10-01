@@ -118,6 +118,50 @@ namespace AdmiralNelsonLordPack {
             return bigGuyCount            
         }
 
+        FixLordsMountAnciliaries(): void {
+            const theWorld = cm.model().world()
+
+            let totalBuggedLord = 0
+            const factionsToBeProcessed = []
+
+            for (const iterator of this.BretonnianFactionsKeys) {
+                const theFaction = theWorld.faction_by_key(iterator)
+                this.l.Log(`is this faction dead? ${iterator}`)
+                if(!theFaction.is_null_interface() && !theFaction.is_dead()) {
+                    factionsToBeProcessed.push(theFaction)
+                    this.l.Log(`no it isnt`)
+                }
+            }
+
+            for (const theFaction of factionsToBeProcessed) {
+                const theArmies = theFaction.military_force_list()
+                for (let index = 0; index < theArmies.num_items(); index++) {
+                    const theArmy = theArmies.item_at(index)
+                    const theGeneral = theArmy.general_character()
+                    this.l.Log(`iterating...${theGeneral.character_subtype_key()} in faction ${theFaction.name()}`)
+                    if(theGeneral.has_skill("wh_main_skill_brt_lord_unique_general_royal_pegasus") && 
+                       !theGeneral.has_ancillary("admiralnelson_bret_general_pegasus_massif_sword_shield_anciliary_key")) 
+                    {
+                        this.l.LogWarn(`found bugged lord ${theGeneral.character_subtype_key()} in faction ${theFaction.name()}, doesn't have admiralnelson_bret_general_pegasus_massif_sword_shield_anciliary_key`)
+                        cm.force_add_ancillary(theGeneral, "admiralnelson_bret_general_pegasus_massif_sword_shield_anciliary_key", true, false)
+                        this.l.Log(`ok`)
+                        totalBuggedLord++
+                    }
+                    if(theGeneral.has_skill("wh_main_skill_brt_lord_unique_general_hippogryph") && 
+                       !theGeneral.has_ancillary("admiralnelson_bret_general_hippogrif_massif_sword_shield_anciliary_key")) 
+                    {
+                        this.l.LogWarn(`found bugged lord ${theGeneral.character_subtype_key()} in faction ${theFaction.name()}, doesn't have admiralnelson_bret_general_hippogrif_massif_sword_shield_anciliary_key`)
+                        cm.force_add_ancillary(theGeneral, "admiralnelson_bret_general_hippogrif_massif_sword_shield_anciliary_key", true, false)
+                        this.l.Log(`ok`)
+                        totalBuggedLord++
+                    }
+                }
+                
+            }
+
+            this.l.Log(`FixLordsMountAnciliaries ok - fixed ${totalBuggedLord} lords`)
+        }
+
         SpawnLordToPool(subtypeKey: string, factionKey: string): void {
             cm.spawn_character_to_pool(factionKey, "", "", "", "", 18, true, "general", subtypeKey, false, "")
             this.l.LogWarn(`I picked ${subtypeKey} lord to be added into pool ${factionKey}`)
@@ -211,6 +255,7 @@ namespace AdmiralNelsonLordPack {
             this.SetupOnFactionTurnStart()
             this.SetupOnRecruitmentFromPool()
             this.SetupOnTurnToResetPool()
+            this.FixLordsMountAnciliaries()
         }
 
         FirstTimeSetup(): void {
