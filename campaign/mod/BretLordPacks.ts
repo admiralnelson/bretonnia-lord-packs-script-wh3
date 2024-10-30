@@ -57,6 +57,14 @@ namespace AdmiralNelsonLordPack {
             "wh_main_brt_carcassonne"
         ]
 
+        public AddBigSizedLord(agentKey: string) {
+            this.BigLordsSubtypes.push(agentKey)
+        }
+
+        public AddNormalSizedLord(agentKey: string) {
+            this.LordAgentSubtypes.push(agentKey)
+        }
+
         private GetLordPoolOnFaction(factionKey: string) : LordPool | null {
             for (const iterator of this.bretLordPool) {
                 if (iterator.Faction == factionKey) return iterator
