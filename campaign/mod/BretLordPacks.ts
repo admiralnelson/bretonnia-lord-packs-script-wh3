@@ -198,17 +198,17 @@ namespace AdmiralNelsonLordPack {
             const twoHandedLordThreshold = isFactionHuman ? HUMAN_2HANDED_LORD_THRESHOLD : BOT_2HANDED_LORD_THRESHOLD;
         
             if (this.DiceRollCheck(bigLordThreshold, DICE_NUMBER, DICE_SIDES)) {
-                this.handleLordSpawn(faction, factionKey, lordPool, isFactionHuman, "big");
+                this.handleLordSpawn(faction, factionKey, "big");
                 return;
             }
         
             if (this.DiceRollCheck(twoHandedLordThreshold, DICE_NUMBER, DICE_SIDES)) {
-                this.handleLordSpawn(faction, factionKey, lordPool, isFactionHuman, "normal");
+                this.handleLordSpawn(faction, factionKey, "normal");
                 return;
             }
         }
         
-        private handleLordSpawn(faction: IFactionScript, factionKey: string, lordPool: LordPool, isFactionHuman: boolean, lordType: "big" | "normal"): void {
+        private handleLordSpawn(faction: IFactionScript, factionKey: string, lordType: "big" | "normal"): void {
             const lordSubtype = lordType === "big" ? this.getRandomBigLordSubtype() : this.getRandomLordSubtype()
         
             if (this.CountBigLords(faction) > MAXIMUM_BIG_LORDS && lordType == "big") {
