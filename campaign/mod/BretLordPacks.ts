@@ -34,12 +34,12 @@ namespace AdmiralNelsonLordPack {
         // private bretLordPool = new Array<LordPool> 
 
         
-        private readonly BigLordsSubtypes = [
+        private static readonly BigLordsSubtypes = [
             "admiralnelson_bret_lord_massif_agent_key",
             "admiralnelson_bret_lord_massif_sword_shield_agent_key",
         ]
 
-        private readonly LordAgentSubtypes = this.BigLordsSubtypes.concat([
+        private static readonly LordAgentSubtypes = this.BigLordsSubtypes.concat([
             "admiralnelson_bret_lord_2handed_agent_key",
         ])
         
@@ -57,12 +57,14 @@ namespace AdmiralNelsonLordPack {
             "wh_main_brt_carcassonne"
         ]
 
-        public AddBigSizedLord(agentKey: string) {
-            this.BigLordsSubtypes.push(agentKey)
+        public static AddBigSizedLord(agentKey: string) {
+            BretLordPack.BigLordsSubtypes.push(agentKey)
+            print(`AddBigSizedLord: Added subtype: ${agentKey}`)
         }
 
-        public AddNormalSizedLord(agentKey: string) {
-            this.LordAgentSubtypes.push(agentKey)
+        public static AddNormalSizedLord(agentKey: string) {
+            BretLordPack.LordAgentSubtypes.push(agentKey)
+            print(`AddNormalSizedLord: Added subtype: ${agentKey}`)
         }
 
         private GetLordPoolOnFaction(factionKey: string) : LordPool | null {
@@ -120,7 +122,7 @@ namespace AdmiralNelsonLordPack {
                 if(!theArmy.is_armed_citizenry() && theArmy.has_general()) {
                     const theGeneral = theArmy.general_character()
                     //this.l.Log(`iterating ${theGeneral.character_subtype_key()}`)
-                    if(this.BigLordsSubtypes.indexOf(theGeneral.character_subtype_key()) >= 0) bigGuyCount++
+                    if(BretLordPack.BigLordsSubtypes.indexOf(theGeneral.character_subtype_key()) >= 0) bigGuyCount++
                 }
             }
             return bigGuyCount            
@@ -201,7 +203,7 @@ namespace AdmiralNelsonLordPack {
                 this.l.LogWarn(`there are ${bigLordsTotal} in this faction ${faction.name()}`)
                 if(bigLordsTotal <= MAXIMUM_BIG_LORDS) {
                     const roll = cm.random_number(1, 0) 
-                    const whichAgentToChoose = this.LordAgentSubtypes[roll]
+                    const whichAgentToChoose = BretLordPack.LordAgentSubtypes[roll]
                     //check its pool before going further, we don't want to spam the recruitment tab 
                     //player can only get 1 (one) brute lord
                     if(lordPool.GetAgentCount(whichAgentToChoose) <= 1 && isFactionHuman) {
@@ -221,7 +223,7 @@ namespace AdmiralNelsonLordPack {
             //try to spawn the 2handed guy instead
             if(this.DiceRollCheck(isFactionHuman ? HUMAN_2HANDED_LORD_THRESHOLD : BOT_2HANDED_LORD_THRESHOLD, DICE_NUMBER, DICE_SIDES)) {
                 isFactionHuman ? this.l.Log("Faction is human, roll success") : this.l.Log("Faction is bot, roll success")
-                const whichAgentToChoose = this.LordAgentSubtypes[2]
+                const whichAgentToChoose = BretLordPack.LordAgentSubtypes[2]
                 //check its pool before going further, we don't want to spam the recruitment tab 
                 if(lordPool.GetAgentCount(whichAgentToChoose) < 2 && isFactionHuman) {
                     this.SpawnLordToPool(whichAgentToChoose, factionKey)
@@ -258,7 +260,7 @@ namespace AdmiralNelsonLordPack {
             
             this.l.LogWarn("hello i'm compiled from typescript!")
             this.l.LogWarn(`BretLordPacks runtime version ${VERSION}`)
-            this.l.LogWarn(`${JSON.stringify(this.LordAgentSubtypes)}`)
+            this.l.LogWarn(`${JSON.stringify(BretLordPack.LordAgentSubtypes)}`)
             this.FirstTimeSetup()
             this.SetupOnFactionTurnStart()
             this.SetupOnRecruitmentFromPool()
@@ -293,7 +295,7 @@ namespace AdmiralNelsonLordPack {
             localStorage.setItem(TAG_VERSIONSTRING, ADMBRETLORDPACK)
             this.l.LogWarn("Save game has been tagged")
             this.BretonnianFactionsKeys.forEach(fac => {
-                this.bretLordPool.push(new LordPool(fac, this.LordAgentSubtypes))
+                this.bretLordPool.push(new LordPool(fac, BretLordPack.LordAgentSubtypes))
             })
             this.Save()
             this.l.LogWarn("Bret lord pool json has been saved")
@@ -329,7 +331,7 @@ namespace AdmiralNelsonLordPack {
 
                     const subtypeKey = theChar.character_subtype_key()
                     this.l.Log(`someone was spawned ${subtypeKey}`)
-                    return this.LordAgentSubtypes.indexOf(subtypeKey) >= 0
+                    return BretLordPack.LordAgentSubtypes.indexOf(subtypeKey) >= 0
                 },
                 (context) => {
                     const theChar = context.character ? context.character() : null
