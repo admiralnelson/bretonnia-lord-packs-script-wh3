@@ -215,16 +215,8 @@ namespace AdmiralNelsonLordPack {
                 this.l.LogWarn(`Faction ${factionKey} has reached maximum number of big lords. Not spawning!`)
                 return
             }
-        
-            const currentLordCount = lordPool.GetAgentCount(lordSubtype)
-            const limit = isFactionHuman && lordType === "big" ? 2 : 5
-        
-            if (currentLordCount < limit) {
-                this.SpawnLordToPool(lordSubtype, factionKey);
-                this.l.LogWarn(`${lordType} lord with subtype ${lordSubtype} spawned into pool ${factionKey}`);
-            } else {
-                this.l.LogWarn(`${lordType} lord with subtype ${lordSubtype} cannot be spawned into pool ${factionKey} because it's full (more than ${limit})`);
-            }
+            
+            this.SpawnLordToPool(lordSubtype, factionKey);
         }
 
         private getRandomBigLordSubtype(): string {
